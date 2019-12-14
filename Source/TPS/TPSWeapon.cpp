@@ -2,14 +2,6 @@
 
 
 #include "TPSWeapon.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "TPSCharacter.h"
-#include "Camera/CameraComponent.h"
-#include "DrawDebugHelpers.h"
-#include "Kismet/GameplayStatics.h"
-#include "Particles/ParticleSystem.h"
-#include "PhysicalMaterials/PhysicalMaterial.h"
-#include "TPS.h"
 
 // Sets default values
 ATPSWeapon::ATPSWeapon()
@@ -26,7 +18,6 @@ ATPSWeapon::ATPSWeapon()
 void ATPSWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -34,23 +25,31 @@ void ATPSWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (!bIsFiring && Accuracy < MaxAccuracy)
+	{
+		Accuracy += AccuracyModifier;
+		IntervalTimer = 0;
+	}
 }
 
 void ATPSWeapon::Fire()
 {
-	ATPSCharacter* myOwner = Cast<ATPSCharacter>(GetOwner());
-	if (myOwner)
+	myOwner = Cast<ATPSCharacter>(GetOwner());
+
+	if (!myOwner) return;
+
+	if (BulletCount > 0)
 	{
-		FVector start = myOwner->FireStartPos();
-		FVector end = start + myOwner->FireForwardDirection() * Range;
+		FVector Start = myOwner->FireStartPos();
+		FVector End = Start + GetFireDirection() * Range;
 
 		if (muzzleEffect)
 		{
 			UGameplayStatics::SpawnEmitterAttached(
-				muzzleEffect, 
-				Cast<USceneComponent>(meshComp), 
-				muzzleSocketName, 
-				FVector::ZeroVector, 
+				muzzleEffect,
+				Cast<USceneComponent>(meshComp),
+				muzzleSocketName,
+				FVector::ZeroVector,
 				FRotator::ZeroRotator);
 		}
 
@@ -59,50 +58,133 @@ void ATPSWeapon::Fire()
 		QueryParams.AddIgnoredActor(this);
 		QueryParams.bReturnPhysicalMaterial = true;
 
-		FHitResult hit;
-		if (GetWorld()->LineTraceSingleByChannel(hit, start, end, ECC_Visibility, QueryParams))
+		FHitResult Hit;
+		if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, QueryParams))
 		{
-			EPhysicalSurface SurfaceType = 
+			EPhysicalSurface SurfaceType =
 				UPhysicalMaterial::DetermineSurfaceType(
-					Cast<UPhysicalMaterial>(hit.PhysMaterial));
+					Cast<UPhysicalMaterial>(Hit.PhysMaterial));
 			float mult = 1;
 			switch (SurfaceType)
 			{
 			case FleshDefault:
 				if (impactEffectFleshDefault)
 				{
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), impactEffectFleshDefault, hit.Location);
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), impactEffectFleshDefault, Hit.Location);
 				}
 				break;
 			case FleshVulnerable:
 				if (impactEffectFleshVulnerable)
 				{
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), impactEffectFleshVulnerable, hit.Location);
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), impactEffectFleshVulnerable, Hit.Location);
 				}
 				mult = DamageMultiplier;
 				break;
 			case Concrete:
 				if (impactEffectConcrete)
 				{
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), impactEffectConcrete, hit.Location);
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), impactEffectConcrete, Hit.Location);
 				}
 				break;
 			default:
 				if (impactEffect)
 				{
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), impactEffect, hit.Location);
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), impactEffect, Hit.Location);
 				}
 				break;
 			}
 
-			UGameplayStatics::ApplyPointDamage(hit.GetActor(), BaseDamage * mult, end - start, hit, GetInstigatorController(), this, damageClass);
+			UGameplayStatics::ApplyPointDamage(Hit.GetActor(), BaseDamage * mult, End - Start, Hit, GetInstigatorController(), this, damageClass);
 
-			DrawDebugLine(GetWorld(), start, hit.Location, FColor::Red, false, 1);
+			DrawDebugLine(GetWorld(), Start, Hit.Location, FColor::Red, false, 1);
 		}
 		else
 		{
-			DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 1);
+			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1);
 		}
+
+		BulletCount--;
 	}
 }
 
+void ATPSWeapon::StartFire()
+{
+	FireInterval = 1 / FireRatePerSec;
+	bIsFiring = true;
+
+	GetWorldTimerManager().ClearTimer(AccuracyTimerHandle);
+
+	switch (WeaponFireMode)
+	{
+	case EWeaponFireMode::SINGLE:
+		Fire();
+		break;
+	case EWeaponFireMode::AUTO:
+		GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATPSWeapon::Fire, FireInterval, true, 0.0f);
+		
+		if (Accuracy > MinAccuracy)
+			GetWorldTimerManager().SetTimer(AccuracyTimerHandle, this, &ATPSWeapon::DecreaseAccuracy, FireInterval, true, 0.0f);
+		break;
+	case EWeaponFireMode::BURST:
+		if (BurstCount < BurstRatePerRound)
+		{
+			GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATPSWeapon::Fire, FireInterval, true, 0.0f);
+			
+			if (Accuracy > MinAccuracy)
+				GetWorldTimerManager().SetTimer(AccuracyTimerHandle, this, &ATPSWeapon::DecreaseAccuracy, FireInterval, true, 0.0f);
+			
+			BurstCount++;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void ATPSWeapon::EndFire()
+{
+	bIsFiring = false;
+
+	switch (WeaponFireMode)
+	{
+	case EWeaponFireMode::SINGLE:
+		break;
+	case EWeaponFireMode::AUTO:
+		GetWorldTimerManager().ClearTimer(FireTimerHandle);
+		break;
+	case EWeaponFireMode::BURST:
+		GetWorldTimerManager().ClearTimer(FireTimerHandle);
+		BurstCount = 0;
+		break;
+	default:
+		break;
+	}
+}
+
+void ATPSWeapon::Reload()
+{
+	BulletCount = MaxBulletCount;
+}
+
+void ATPSWeapon::DecreaseAccuracy()
+{
+	Accuracy -= AccuracyModifier;
+}
+
+void ATPSWeapon::IncreaseAccuracy()
+{
+	Accuracy += AccuracyModifier;
+}
+
+FVector ATPSWeapon::GetFireDirection()
+{
+	FVector Start = myOwner->FireStartPos();
+	FVector End = Start + myOwner->FireForwardDirection();
+	
+	float ConeHalfAngleRad = FMath::Acos(Accuracy);
+	//float ConeHalfAngleRad = PI/4;
+	
+	FVector RandomDirectionInCone = FMath::VRandCone(End - Start, ConeHalfAngleRad);
+
+	return RandomDirectionInCone;
+}

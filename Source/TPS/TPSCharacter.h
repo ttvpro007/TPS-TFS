@@ -42,13 +42,20 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	TSubclassOf<ATPSWeapon> weaponType;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	ATPSWeapon* currentWeapon;
 public:
 	virtual FVector FireStartPos();
 	virtual FVector FireForwardDirection();
 protected:
+	bool bIsInCover;
+	bool bCanFire;
 	UFUNCTION(BlueprintCallable)
-	void Fire();
+	void StartFire();
+	UFUNCTION(BlueprintCallable)
+	void EndFire();
+	UFUNCTION(BlueprintCallable)
+	void ReloadWeapon();
 	UFUNCTION(BlueprintCallable)
 	void StartZoom();
 	UFUNCTION(BlueprintCallable)

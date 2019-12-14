@@ -59,7 +59,9 @@ void ATPSPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 	PlayerInputComponent->BindAxis("LookSideways", this, &ATPSPlayer::AddControllerYawInput);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ATPSPlayer::StartCrouch);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ATPSPlayer::EndCrouch);
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ATPSPlayer::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ATPSPlayer::StartFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ATPSPlayer::EndFire);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ATPSPlayer::ReloadWeapon);
 	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &ATPSPlayer::StartZoom);
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ATPSPlayer::EndZoom);
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ATPSPlayer::StartRun);

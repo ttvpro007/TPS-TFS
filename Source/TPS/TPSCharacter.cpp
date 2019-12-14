@@ -171,9 +171,33 @@ FVector ATPSCharacter::FireForwardDirection()
 	return GetViewRotation().Vector();
 }
 
-void ATPSCharacter::Fire()
+void ATPSCharacter::StartFire()
 {
-	currentWeapon->Fire();
+	switch (PlayerCharacterState)
+	{
+	case Walking:
+		currentWeapon->StartFire();
+		break;
+	case SlidingIntoCover:
+		break;
+	case InCover:
+		break;
+	case InCoverAndAiming:
+		currentWeapon->StartFire();
+		break;
+	default:
+		break;
+	}
+}
+
+void ATPSCharacter::EndFire()
+{
+	currentWeapon->EndFire();
+}
+
+void ATPSCharacter::ReloadWeapon()
+{
+	currentWeapon->Reload();
 }
 
 void ATPSCharacter::TakeCover()
