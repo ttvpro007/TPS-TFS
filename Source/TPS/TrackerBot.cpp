@@ -74,7 +74,7 @@ void ATrackerBot::SelfDestruct()
 	UGameplayStatics::SpawnSoundAtLocation(this, explodeSoundEffect, GetActorLocation());
 	TArray<AActor*> IgnoredActors;
 	IgnoredActors.Add(this);
-	UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoredActors, this, GetInstigatorController(), true);
+	UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoredActors, this, GetInstigatorController(), false, ECollisionChannel::ECC_Visibility);
 	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 24, FColor::Red, false, 5, 0, 3);
 	Destroy();
 }

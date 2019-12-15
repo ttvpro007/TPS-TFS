@@ -77,9 +77,11 @@ protected:
 
 	// general properties
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
-	int MaxBulletCount = 100;
-	UPROPERTY(BlueprintReadOnly, Category = "Weapon Properties")
-	int BulletCount = 100;
+	int MaxAmmoCount;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
+	int StartAmmoCount;
+	UPROPERTY(BlueprintReadWrite, Category = "Weapon Properties")
+	int CurrentAmmoCount;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	float BaseDamage = 20;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")

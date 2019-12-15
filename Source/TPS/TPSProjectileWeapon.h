@@ -17,11 +17,17 @@ class TPS_API ATPSProjectileWeapon : public ATPSWeapon
 	GENERATED_BODY()
 	
 public:
+	// Sets default values for this actor's properties
+	ATPSProjectileWeapon();
 	virtual void Fire() override;
 
 protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	TSubclassOf<class ATPSProjectile> ProjectileClass;
+
+	UWorld* World;
 
 private:
 	FVector ProjectileSpawnPointLocation;

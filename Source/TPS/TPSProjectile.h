@@ -32,16 +32,18 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom Components")
 	UProjectileMovementComponent* ProjectileMovement;
 
+	bool bExploded = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile Properties")
 	UParticleSystem* explodeEffect;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile Properties")
 	USoundCue* explodeSoundEffect;
 	FTimerHandle ExplosionTimer;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile Properties")
+	float ExplosionTime;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile Properties")
 	float ExplosionDamage;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile Properties")
 	float ExplodeRadius;
-	bool bExploded = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile Properties")
 	float InitialSpeed;
 

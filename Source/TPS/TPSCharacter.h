@@ -42,14 +42,13 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	TSubclassOf<ATPSWeapon> weaponType;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon Properties")
 	ATPSWeapon* currentWeapon;
 public:
 	virtual FVector FireStartPos();
 	virtual FVector FireForwardDirection();
 protected:
-	bool bIsInCover;
-	bool bCanFire;
+	// weapon
 	UFUNCTION(BlueprintCallable)
 	void StartFire();
 	UFUNCTION(BlueprintCallable)
@@ -62,6 +61,9 @@ protected:
 	void EndZoom();
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon Properties")
 	bool bZoomed;
+	bool bCanFire;
+	int32 Slot1WeaponAmmo;
+	int32 Slot2WeaponAmmo;
 
 	/*RUN*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Properties")
@@ -75,9 +77,12 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void EndRun();
 
+	// state
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Properties")
 	TEnumAsByte<CharacterStateEnum> PlayerCharacterState;
 
+	// cover
+	bool bIsInCover;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Cover Properties")
 	UBoxComponent* CoverTriggerVolume;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Cover Properties")
@@ -93,11 +98,13 @@ protected:
 	float slidingIntoCoverSpeed = 10.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Cover Properties")
 	float closingDistance = 10.0f;
+
 	// Health
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Custom Components")
 	UHealthComponent* HealthComp;
 	UFUNCTION()
 	void HandleOnHealthChanged(UHealthComponent* HealthCompVar, float Health, float DeltaHealth, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	
 	// Material
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player Properties")
 	UMaterialInterface* deathMaterial;

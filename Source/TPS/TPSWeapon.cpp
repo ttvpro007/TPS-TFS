@@ -12,13 +12,12 @@ ATPSWeapon::ATPSWeapon()
 	RootComponent = meshComp;
 }
 
-
-
 // Called when the game starts or when spawned
 void ATPSWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	float SpreadAngle = NormalSpreadAngle;
+	SpreadAngle = NormalSpreadAngle;
+	CurrentAmmoCount = StartAmmoCount;
 }
 
 // Called every frame
@@ -33,7 +32,7 @@ void ATPSWeapon::Fire()
 
 	if (!myOwner) return;
 
-	if (BulletCount > 0)
+	if (CurrentAmmoCount > 0)
 	{
 		FVector Start = myOwner->FireStartPos();
 		FVector End = Start + GetFireDirection() * Range;
@@ -98,7 +97,7 @@ void ATPSWeapon::Fire()
 			DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1);
 		}
 
-		BulletCount--;
+		CurrentAmmoCount--;
 	}
 }
 
@@ -173,7 +172,7 @@ void ATPSWeapon::EndFire()
 
 void ATPSWeapon::Reload()
 {
-	BulletCount = MaxBulletCount;
+	CurrentAmmoCount = MaxAmmoCount;
 }
 
 FVector ATPSWeapon::GetFireDirection()

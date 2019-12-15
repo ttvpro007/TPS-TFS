@@ -3,47 +3,67 @@
 
 #include "TPSProjectileWeapon.h"
 
+ATPSProjectileWeapon::ATPSProjectileWeapon()
+{
+	myOwner = Cast<ATPSCharacter>(GetOwner());
+	World = GetWorld();
+}
+
+// Called when the game starts or when spawned
+void ATPSProjectileWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+	CurrentAmmoCount = StartAmmoCount;
+}
+
 void ATPSProjectileWeapon::Fire()
 {
+	myOwner = Cast<ATPSCharacter>(GetOwner());
 	if (ProjectileClass)
 	{
-		if (BulletCount > 0)
+		if (myOwner)
 		{
-			if (muzzleEffect)
+			if (CurrentAmmoCount > 0)
 			{
-				UGameplayStatics::SpawnEmitterAttached(
-					muzzleEffect,
-					Cast<USceneComponent>(meshComp),
-					muzzleSocketName,
-					FVector::ZeroVector,
-					FRotator::ZeroRotator);
-			}
-
-			UWorld* const World = GetWorld();
-			if (World)
-			{
-				FActorSpawnParameters SpawnParams;
-				SpawnParams.Owner = this;
-				SpawnParams.Instigator = Instigator;
-
-				ProjectileSpawnPointLocation = meshComp->GetSocketLocation(muzzleSocketName);
-				ProjectileSpawnPointRotation = meshComp->GetSocketRotation(muzzleSocketName);
-
-				ATPSProjectile* const Projectile = World->SpawnActor<ATPSProjectile>
-					(
-						ProjectileClass,
-						ProjectileSpawnPointLocation,
-						ProjectileSpawnPointRotation,
-						SpawnParams
-						);
-
-				if (Projectile)
+				if (muzzleEffect)
 				{
-					Projectile->InitiateVelocity(ProjectileSpawnPointRotation.Vector());
+					UGameplayStatics::SpawnEmitterAttached(
+						muzzleEffect,
+						Cast<USceneComponent>(meshComp),
+						muzzleSocketName,
+						FVector::ZeroVector,
+						FRotator::ZeroRotator);
 				}
-			}
 
-			BulletCount--;
+				if (World)
+				{
+					FActorSpawnParameters SpawnParams;
+					SpawnParams.Owner = this;
+					SpawnParams.Instigator = Instigator;
+
+					ProjectileSpawnPointLocation = meshComp->GetSocketLocation(muzzleSocketName);
+					ProjectileSpawnPointRotation = meshComp->GetSocketRotation(muzzleSocketName);
+
+					ATPSProjectile* const Projectile = World->SpawnActor<ATPSProjectile>
+						(
+							ProjectileClass,
+							ProjectileSpawnPointLocation,
+							ProjectileSpawnPointRotation,
+							SpawnParams
+							);
+
+					if (Projectile)
+					{
+						FVector Start = myOwner->FireStartPos();
+						FVector End = Start + myOwner->FireForwardDirection();
+						FVector Direction = End - Start;
+
+						Projectile->InitiateVelocity(Direction.GetSafeNormal());
+					}
+				}
+
+				CurrentAmmoCount--;
+			}
 		}
 		
 	}
