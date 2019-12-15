@@ -18,18 +18,13 @@ ATPSWeapon::ATPSWeapon()
 void ATPSWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+	float SpreadAngle = NormalSpreadAngle;
 }
 
 // Called every frame
 void ATPSWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (!bIsFiring && Accuracy < MaxAccuracy)
-	{
-		Accuracy += AccuracyModifier;
-		IntervalTimer = 0;
-	}
 }
 
 void ATPSWeapon::Fire()
@@ -112,7 +107,17 @@ void ATPSWeapon::StartFire()
 	FireInterval = 1 / FireRatePerSec;
 	bIsFiring = true;
 
-	GetWorldTimerManager().ClearTimer(AccuracyTimerHandle);
+	switch (WeaponZoomMode)
+	{
+	case EWeaponZoomMode::NORMAL:
+		SpreadAngle = NormalSpreadAngle;
+		break;
+	case EWeaponZoomMode::ZOOMED:
+		SpreadAngle = ZoomedSpreadAngle;
+		break;
+	default:
+		break;
+	}
 
 	switch (WeaponFireMode)
 	{
@@ -121,18 +126,11 @@ void ATPSWeapon::StartFire()
 		break;
 	case EWeaponFireMode::AUTO:
 		GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATPSWeapon::Fire, FireInterval, true, 0.0f);
-		
-		if (Accuracy > MinAccuracy)
-			GetWorldTimerManager().SetTimer(AccuracyTimerHandle, this, &ATPSWeapon::DecreaseAccuracy, FireInterval, true, 0.0f);
 		break;
 	case EWeaponFireMode::BURST:
 		if (BurstCount < BurstRatePerRound)
 		{
 			GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATPSWeapon::Fire, FireInterval, true, 0.0f);
-			
-			if (Accuracy > MinAccuracy)
-				GetWorldTimerManager().SetTimer(AccuracyTimerHandle, this, &ATPSWeapon::DecreaseAccuracy, FireInterval, true, 0.0f);
-			
 			BurstCount++;
 		}
 		break;
@@ -144,6 +142,18 @@ void ATPSWeapon::StartFire()
 void ATPSWeapon::EndFire()
 {
 	bIsFiring = false;
+
+	switch (WeaponZoomMode)
+	{
+	case EWeaponZoomMode::NORMAL:
+		SpreadAngle = NormalSpreadAngle;
+		break;
+	case EWeaponZoomMode::ZOOMED:
+		SpreadAngle = ZoomedSpreadAngle;
+		break;
+	default:
+		break;
+	}
 
 	switch (WeaponFireMode)
 	{
@@ -166,23 +176,12 @@ void ATPSWeapon::Reload()
 	BulletCount = MaxBulletCount;
 }
 
-void ATPSWeapon::DecreaseAccuracy()
-{
-	Accuracy -= AccuracyModifier;
-}
-
-void ATPSWeapon::IncreaseAccuracy()
-{
-	Accuracy += AccuracyModifier;
-}
-
 FVector ATPSWeapon::GetFireDirection()
 {
 	FVector Start = myOwner->FireStartPos();
 	FVector End = Start + myOwner->FireForwardDirection();
 	
-	float ConeHalfAngleRad = FMath::Acos(Accuracy);
-	//float ConeHalfAngleRad = PI/4;
+	float ConeHalfAngleRad = SpreadAngle / 2;
 	
 	FVector RandomDirectionInCone = FMath::VRandCone(End - Start, ConeHalfAngleRad);
 

@@ -2,17 +2,6 @@
 
 
 #include "TrackerBot.h"
-#include "Kismet/GameplayStatics.h"
-#include "NavigationSystem.h"
-#include "NavigationPath.h"
-#include "Components/StaticMeshComponent.h"
-#include "HealthComponent.h"
-#include "GameFramework/Character.h"
-#include "DrawDebugHelpers.h"
-#include "Materials/MaterialInstanceDynamic.h"
-#include "Sound/SoundCue.h"
-#include "Components/SphereComponent.h"
-#include "TimerManager.h"
 
 // Sets default values
 ATrackerBot::ATrackerBot()

@@ -4,7 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Kismet/GameplayStatics.h"
+#include "NavigationSystem.h"
+#include "NavigationPath.h"
+#include "Components/StaticMeshComponent.h"
+#include "HealthComponent.h"
+#include "GameFramework/Character.h"
+#include "DrawDebugHelpers.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Sound/SoundCue.h"
+#include "Components/SphereComponent.h"
+#include "TimerManager.h"
 #include "TrackerBot.generated.h"
+
 class USoundCue;
 class USphereComponent;
 class UHealthComponent;

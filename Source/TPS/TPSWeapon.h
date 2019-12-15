@@ -16,11 +16,18 @@
 #include "TPSWeapon.generated.h"
 
 UENUM(BlueprintType)
-enum EWeaponFireMode
+enum class EWeaponFireMode : uint8
 {
-	SINGLE UMETA(DysplayName = "Single Fire"),
-	AUTO UMETA(DysplayName = "Automatic Fire"),
-	BURST UMETA(DysplayName = "Burst Fire")
+	SINGLE,
+	AUTO,
+	BURST
+};
+
+UENUM(BlueprintType)
+enum class EWeaponZoomMode : uint8
+{
+	NORMAL,
+	ZOOMED
 };
 
 class UParticleSystem;
@@ -46,9 +53,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	TSubclassOf<UDamageType> damageClass;
 
+	// fire mode
 	bool bIsFiring;
 	FTimerHandle FireTimerHandle;
-	FTimerHandle AccuracyTimerHandle;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	TEnumAsByte<EWeaponFireMode> WeaponFireMode;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
@@ -57,28 +64,18 @@ protected:
 	float BurstRatePerRound = 3;
 	float BurstCount = 0;
 	float FireInterval = 0;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
-	float MinAccuracy;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
-	float MaxAccuracy;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
-	float Accuracy;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
-	float AccuracyModifier;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
-	float AccuracyModifyInterval = 0.2;
 
+	// accuracy
+	UPROPERTY(BlueprintReadWrite, Category = "Weapon Properties")
+	TEnumAsByte<EWeaponZoomMode> WeaponZoomMode;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
-	float MinZoomAccuracy;
+	float NormalSpreadAngle;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
-	float MaxZoomAccuracy;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
-	float ZoomAccuracy;
-	float IntervalTimer = 0.2 + 1;
+	float ZoomedSpreadAngle;
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon Properties")
+	float SpreadAngle = NormalSpreadAngle;
 
-	void DecreaseAccuracy();
-	void IncreaseAccuracy();
-
+	// general properties
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	int MaxBulletCount = 100;
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon Properties")
@@ -89,6 +86,8 @@ protected:
 	float DamageMultiplier = 5;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	float Range = 10000;
+
+	// fx
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	UParticleSystem* muzzleEffect;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
