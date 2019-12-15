@@ -13,6 +13,7 @@
 #include "Particles/ParticleSystem.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Math/UnrealMathUtility.h"
+#include "Sound/SoundCue.h"
 #include "TPSWeapon.generated.h"
 
 UENUM(BlueprintType)
@@ -30,6 +31,7 @@ enum class EWeaponZoomMode : uint8
 	ZOOMED
 };
 
+class USoundCue;
 class UParticleSystem;
 class USkeletalMeshComponent;
 UCLASS()
@@ -89,7 +91,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	float Range = 10000;
 
-	// fx
+	// vfx
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	UParticleSystem* muzzleEffect;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
@@ -102,6 +104,12 @@ protected:
 	UParticleSystem* impactEffectConcrete;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	FName muzzleSocketName;
+
+	// sfx
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
+	USoundCue* GunShotEffect;
+
+
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual void Fire();

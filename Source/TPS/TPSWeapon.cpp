@@ -47,6 +47,11 @@ void ATPSWeapon::Fire()
 				FRotator::ZeroRotator);
 		}
 
+		if (GunShotEffect)
+		{
+			UGameplayStatics::SpawnSoundAtLocation(this, GunShotEffect, GetActorLocation());
+		}
+
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(myOwner);
 		QueryParams.AddIgnoredActor(this);

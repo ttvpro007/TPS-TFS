@@ -35,6 +35,11 @@ void ATPSProjectileWeapon::Fire()
 						FRotator::ZeroRotator);
 				}
 
+				if (GunShotEffect)
+				{
+					UGameplayStatics::SpawnSoundAtLocation(this, GunShotEffect, GetActorLocation());
+				}
+
 				if (World)
 				{
 					FActorSpawnParameters SpawnParams;
