@@ -18,6 +18,7 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Health Properties")
 	float MaxHealth = 100;
+	UPROPERTY(BlueprintReadOnly, Category = "Health Properties")
 	float Health;
 	UFUNCTION()
 	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
