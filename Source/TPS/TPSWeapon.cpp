@@ -20,6 +20,12 @@ void ATPSWeapon::BeginPlay()
 	CurrentAmmoCount = StartAmmoCount;
 }
 
+void ATPSWeapon::IncreaseSpreadAngle(float IncrementValue, float MaxSpreadAngleValue)
+{
+	SpreadAngle += IncrementValue;
+	SpreadAngle = FMath::Min(SpreadAngle, MaxSpreadAngleValue);
+}
+
 // Called every frame
 void ATPSWeapon::Tick(float DeltaTime)
 {
@@ -34,6 +40,8 @@ void ATPSWeapon::Fire()
 
 	if (CurrentAmmoCount > 0)
 	{
+		bIsFiring = true;
+
 		FVector Start = myOwner->FireStartPos();
 		FVector End = Start + GetFireDirection() * Range;
 
@@ -104,12 +112,17 @@ void ATPSWeapon::Fire()
 
 		CurrentAmmoCount--;
 	}
+	else bIsFiring = false; // set is firing to false if current bullet count is 0
+
+	if (bIsFiring)
+	{
+		IncreaseSpreadAngle(SpreadAngleModifierValue, MaxSpreadAngle);
+	}
 }
 
 void ATPSWeapon::StartFire()
 {
 	FireInterval = 1 / FireRatePerSec;
-	bIsFiring = true;
 
 	switch (WeaponZoomMode)
 	{

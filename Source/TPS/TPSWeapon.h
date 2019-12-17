@@ -76,6 +76,10 @@ protected:
 	float ZoomedSpreadAngle;
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon Properties")
 	float SpreadAngle = NormalSpreadAngle;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
+	float SpreadAngleModifierValue;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
+	float MaxSpreadAngle;
 
 	// general properties
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
@@ -109,22 +113,29 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	USoundCue* GunShotEffect;
 
-
 public:
+	// fire
 	UFUNCTION(BlueprintCallable)
 	virtual void Fire();
-
-public:
 	UFUNCTION(BlueprintCallable)
 	void StartFire();
 	UFUNCTION(BlueprintCallable)
 	void EndFire();
 	UFUNCTION(BlueprintCallable)
 	void Reload();
+
+	// zoom
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties", meta = (ClampMin = 0.1, ClampMax = 100))
 	float zoomFOV;
+
+	// bullet spread
 	UFUNCTION(BlueprintCallable)
 	FVector GetFireDirection();
+
+	// accuracy
+	UFUNCTION(BlueprintCallable)
+	void IncreaseSpreadAngle(float IncrementValue, float MaxSpreadAngleValue);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 };
