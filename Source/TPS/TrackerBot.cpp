@@ -76,7 +76,10 @@ void ATrackerBot::SelfDestruct()
 	IgnoredActors.Add(this);
 	UGameplayStatics::ApplyRadialDamage(this, ExplosionDamage, GetActorLocation(), ExplodeRadius, nullptr, IgnoredActors, this, GetInstigatorController(), false, ECollisionChannel::ECC_Visibility);
 	DrawDebugSphere(GetWorld(), GetActorLocation(), ExplodeRadius, 24, FColor::Red, false, 5, 0, 3);
-	Destroy();
+	MoveForce = 0;
+	MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	DetachFromControllerPendingDestroy();
+	SetLifeSpan(0.1f);
 }
 
 void ATrackerBot::StartSelfDamage(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -98,10 +101,13 @@ void ATrackerBot::Tick(float DeltaTime)
 	{
 		if (FVector::Dist(GetActorLocation(), player->GetActorLocation()) > closingDistance)
 		{
-			FVector force = NextPathPoint - GetActorLocation();
-			force.Normalize();
-			force *= MoveForce;
-			MeshComp->AddForce(force, NAME_None, bUseVelocityChange);
+			if (MoveForce != 0)
+			{
+				FVector force = NextPathPoint - GetActorLocation();
+				force.Normalize();
+				force *= MoveForce;
+				MeshComp->AddForce(force, NAME_None, bUseVelocityChange);
+			}
 		}
 		if (FVector::Dist(GetActorLocation(), NextPathPoint) < closingDistance)
 		{

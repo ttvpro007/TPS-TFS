@@ -18,6 +18,8 @@ void ATPSWeapon::BeginPlay()
 	Super::BeginPlay();
 	SpreadAngle = NormalSpreadAngle;
 	CurrentAmmoCount = StartAmmoCount;
+	FireInterval = 1 / FireRatePerSec;
+	FireTimer = 0;
 }
 
 void ATPSWeapon::IncreaseSpreadAngle(float IncrementValue, float MaxSpreadAngleValue)
@@ -30,6 +32,8 @@ void ATPSWeapon::IncreaseSpreadAngle(float IncrementValue, float MaxSpreadAngleV
 void ATPSWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	FireTimeCountingDown(DeltaTime);
 }
 
 void ATPSWeapon::Fire()
@@ -120,11 +124,15 @@ void ATPSWeapon::Fire()
 	}
 }
 
-void ATPSWeapon::StartFire()
+void ATPSWeapon::FireTimeCountingDown(float DeltaTime)
 {
-	FireInterval = 1 / FireRatePerSec;
+	FireTimer -= DeltaTime;
+	FireTimer = FMath::Max(FireTimer, 0.0f);
+}
 
-	switch (WeaponZoomMode)
+void ATPSWeapon::SetSpreadAngle(EWeaponZoomMode ZoomMode)
+{
+	switch (ZoomMode)
 	{
 	case EWeaponZoomMode::NORMAL:
 		SpreadAngle = NormalSpreadAngle;
@@ -135,11 +143,21 @@ void ATPSWeapon::StartFire()
 	default:
 		break;
 	}
+}
+
+void ATPSWeapon::StartFire()
+{
+	/*FireInterval = 1 / FireRatePerSec;
+	FireTimer = FireInterval;*/
 
 	switch (WeaponFireMode)
 	{
 	case EWeaponFireMode::SINGLE:
-		Fire();
+		if (FireTimer == 0)
+		{
+			Fire();
+			FireTimer = FireInterval;
+		}
 		break;
 	case EWeaponFireMode::AUTO:
 		GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ATPSWeapon::Fire, FireInterval, true, 0.0f);
@@ -159,18 +177,6 @@ void ATPSWeapon::StartFire()
 void ATPSWeapon::EndFire()
 {
 	bIsFiring = false;
-
-	switch (WeaponZoomMode)
-	{
-	case EWeaponZoomMode::NORMAL:
-		SpreadAngle = NormalSpreadAngle;
-		break;
-	case EWeaponZoomMode::ZOOMED:
-		SpreadAngle = ZoomedSpreadAngle;
-		break;
-	default:
-		break;
-	}
 
 	switch (WeaponFireMode)
 	{
@@ -195,12 +201,41 @@ void ATPSWeapon::Reload()
 
 FVector ATPSWeapon::GetFireDirection()
 {
-	FVector Start = myOwner->FireStartPos();
-	FVector End = Start + myOwner->FireForwardDirection();
-	
-	float ConeHalfAngleRad = SpreadAngle / 2;
-	
-	FVector RandomDirectionInCone = FMath::VRandCone(End - Start, ConeHalfAngleRad);
+	FVector RandomDirectionInCone = FVector::ZeroVector;
+
+	if (myOwner)
+	{
+		FVector Start = myOwner->FireStartPos();
+		FVector End = Start + myOwner->FireForwardDirection();
+
+		float ConeHalfAngleRad = SpreadAngle / 2;
+
+		RandomDirectionInCone = FMath::VRandCone(End - Start, ConeHalfAngleRad);
+	}
 
 	return RandomDirectionInCone;
+}
+
+FVector ATPSWeapon::GetAimEndPoint()
+{
+	FVector End = FVector::ZeroVector;
+
+	if (myOwner)
+	{
+		FVector Start = meshComp->GetSocketLocation(muzzleSocketName);
+		End = Start + myOwner->FireForwardDirection() * Range;
+
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(myOwner);
+		QueryParams.AddIgnoredActor(this);
+		QueryParams.bReturnPhysicalMaterial = true;
+
+		FHitResult Hit;
+		if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, QueryParams))
+		{
+			return Hit.Location;
+		}
+	}
+
+	return End;
 }

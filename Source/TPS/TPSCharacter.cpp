@@ -39,6 +39,8 @@ void ATPSCharacter::BeginPlay()
 
 void ATPSCharacter::HandleOnHealthChanged(UHealthComponent* HealthCompVar, float Health, float DeltaHealth, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
+	HealthComp->ResetHealthRegenTimer();
+
 	if (Health <= 0)
 	{
 		PlayerCharacterState = CharacterStateEnum::Dead;
@@ -47,7 +49,7 @@ void ATPSCharacter::HandleOnHealthChanged(UHealthComponent* HealthCompVar, float
 		DetachFromControllerPendingDestroy();
 		GetMesh()->CreateAndSetMaterialInstanceDynamicFromMaterial(0, deathMaterial);
 		GetMesh()->SetScalarParameterValueOnMaterials("StartTime", UGameplayStatics::GetRealTimeSeconds(this));
-		SetLifeSpan(10.0f);
+		SetLifeSpan(1.0f);
 	}
 }
 
@@ -134,6 +136,8 @@ void ATPSCharacter::StartZoom()
 	{
 		PlayerCharacterState = CharacterStateEnum::InCoverAndAiming;
 		GetMesh()->SetRelativeRotation(FRotator(0, -90, 0));
+		//currentWeapon->WeaponZoomMode = EWeaponZoomMode::ZOOMED;
+		//currentWeapon->SetSpreadAngle(EWeaponZoomMode::ZOOMED);
 	}
 }
 
@@ -146,6 +150,8 @@ void ATPSCharacter::EndZoom()
 		FRotator rot = CoverTriggerVolume->GetComponentRotation();
 		rot = rot.Add(0, 50, 0);
 		GetMesh()->SetWorldRotation(rot);
+		//currentWeapon->WeaponZoomMode = EWeaponZoomMode::NORMAL;
+		//currentWeapon->SetSpreadAngle(EWeaponZoomMode::NORMAL);
 	}
 }
 

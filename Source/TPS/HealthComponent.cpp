@@ -33,6 +33,27 @@ void UHealthComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, c
 	}
 }
 
+void UHealthComponent::ResetHealthRegenTimer()
+{
+	HealthRegenTimer = HealthRegenCountdownTime;
+}
+
+void UHealthComponent::RegenHealth(float AmountPerTick)
+{
+	Health += AmountPerTick;
+	Health = FMath::Min(MaxHealth, Health);
+
+	if (Health == MaxHealth) ResetHealthRegenTimer();
+}
+
+float UHealthComponent::RegenTimeCountingDown(float DeltaTime)
+{
+	HealthRegenTimer -= DeltaTime;
+	HealthRegenTimer = FMath::Max(HealthRegenTimer, 0.0f);
+
+	return HealthRegenTimer;
+}
+
 // Called when the game starts
 void UHealthComponent::BeginPlay()
 {
@@ -51,7 +72,6 @@ void UHealthComponent::BeginPlay()
 void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 	// ...
 }
 

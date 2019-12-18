@@ -66,16 +66,26 @@ protected:
 	float BurstRatePerRound = 3;
 	float BurstCount = 0;
 	float FireInterval = 0;
+	float FireTimer;
+	UFUNCTION()
+	void FireTimeCountingDown(float DeltaTime);
 
 	// accuracy
-	UPROPERTY(BlueprintReadWrite, Category = "Weapon Properties")
-	TEnumAsByte<EWeaponZoomMode> WeaponZoomMode;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	float NormalSpreadAngle;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	float ZoomedSpreadAngle;
+public:
+	// accuracy
+	UPROPERTY(BlueprintReadWrite, Category = "Weapon Properties")
+	TEnumAsByte<EWeaponZoomMode> WeaponZoomMode;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon Properties")
 	float SpreadAngle = NormalSpreadAngle;
+	UFUNCTION(BlueprintCallable)
+	void SetSpreadAngle(EWeaponZoomMode ZoomMode);
+
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	float SpreadAngleModifierValue;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
@@ -95,6 +105,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	float Range = 10000;
 
+public:
+	// zoom
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties", meta = (ClampMin = 0.1, ClampMax = 100))
+	float zoomFOV;
+
+protected:
 	// vfx
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties")
 	UParticleSystem* muzzleEffect;
@@ -124,13 +140,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Reload();
 
-	// zoom
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon Properties", meta = (ClampMin = 0.1, ClampMax = 100))
-	float zoomFOV;
-
 	// bullet spread
 	UFUNCTION(BlueprintCallable)
 	FVector GetFireDirection();
+	UFUNCTION(BlueprintCallable)
+	FVector GetAimEndPoint();
 
 	// accuracy
 	UFUNCTION(BlueprintCallable)
